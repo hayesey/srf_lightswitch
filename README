@@ -1,0 +1,21 @@
+srf_lightswitch
+-----
+Originally written sometime in 2015
+2016-11-17 put on github
+-----
+
+This is my home-made "IoT" light switch.  The idea is that you can retrofit this into a lamp or ceiling light to turn the light on and off remotely.  In addition you can connect up the existing bistable switch (i.e. the light switch) to also operate the light in order to maintain the operation people expect of a light & light switch.
+
+It's based on a Texas Instruments CC1110 System-on-Chip.  The module I use is actually an SRF module from the sadly now defunct Ciseco/Wireless Things company.  This and all other components are mounted to a PCB of my own design.
+
+It uses a PCB mounted mains voltage transformer, this actually powers the microcontroller and other parts of the circuit from the mains voltage going to the light itself.  No batteries are needed or any other means of power.
+
+Files:
+
+'SRF Light Switch' folder contains the design, layout and gerber files for the PCB.  The software I use is Cadsoft Eagle.  I used Seeedstudio Fusion PCB online service for the production of prototype boards.  They are very cheap but since the work is done in China, delivery takes weeks.
+
+'Firmware' folder contains the C code for the CC1110 chip to make the light switch work.  I would definitely call it a prototype, it is probably full of bugs.  It has some basic LLAP commands to control the light switch from other devices such as Ciseco XRF modules.
+
+Use at your own risk anyone who finds this.  I only ever intended this to be for experimentation or fun.
+
+Paul Hayes.

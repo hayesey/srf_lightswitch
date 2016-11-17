@@ -371,7 +371,7 @@ UsedLibrary="/home/paul/eagle-7.2.0/lbr/Ciseco-Eagle-Library/Ciseco Pi Compute M
 
 [Win_1]
 Type="Control Panel"
-Loc="39 66 638 465"
+Loc="477 442 1076 841"
 State=1
 Number=0
 
