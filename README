@@ -16,6 +16,10 @@ Files:
 
 'Firmware' folder contains the C code for the CC1110 chip to make the light switch work.  I would definitely call it a prototype, it is probably full of bugs.  It has some basic LLAP commands to control the light switch from other devices such as Ciseco XRF modules.
 
+To use this you'll need the Small Devices C Compiler (sdcc) and some way burning the compiled firmware on to the CC1110 device.  I use a proper TI CC-Debugger, they are under £40.  I believe a Raspberry Pi can also be used to bit-bang it.  See this:
+
+http://paulswasteland.blogspot.co.uk/2015/01/building-your-own-firmware-for-ciseco.html
+
 Use at your own risk anyone who finds this.  I only ever intended this to be for experimentation or fun.
 
 Paul Hayes.
