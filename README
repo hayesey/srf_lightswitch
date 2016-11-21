@@ -2,6 +2,7 @@ srf_lightswitch
 -----
 Originally written sometime in 2015
 2016-11-17 put on github
+2016-11-21 added filter info
 -----
 
 This is my home-made "IoT" light switch.  The idea is that you can retrofit this into a lamp or ceiling light to turn the light on and off remotely.  In addition you can connect up the existing bistable switch (i.e. the light switch) to also operate the light in order to maintain the operation people expect of a light & light switch.
@@ -21,5 +22,7 @@ To use this you'll need the Small Devices C Compiler (sdcc) and some way burning
 http://paulswasteland.blogspot.co.uk/2015/01/building-your-own-firmware-for-ciseco.html
 
 Use at your own risk anyone who finds this.  I only ever intended this to be for experimentation or fun.
+
+Note - there was an error by me with the PCB layout that didn't come to light until after I had them produced.  This is that I hadn't included the low pass filter on the output of the 3.3v transformer.  Without this the radio performance is very poor.  I made a small veroboard circuit to add the filter, there is an eagle schematic and layout showing this and the parts are included in the BOM.  Values are from the datasheet for the Vigortronix transformer.
 
 Paul Hayes.
