@@ -7,6 +7,7 @@ Desktop="Desktop"
 
 [Globals]
 AutoSaveProject=1
+UsedLibrary="/home/paul/eagle-7.5.0/lbr/Bourns_By_element14_Batch_1.lbr"
 UsedLibrary="/home/paul/eagle-7.2.0/lbr/19inch.lbr"
 UsedLibrary="/home/paul/eagle-7.2.0/lbr/40xx.lbr"
 UsedLibrary="/home/paul/eagle-7.2.0/lbr/41xx.lbr"
@@ -371,7 +372,7 @@ UsedLibrary="/home/paul/eagle-7.2.0/lbr/Ciseco-Eagle-Library/Ciseco Pi Compute M
 
 [Win_1]
 Type="Control Panel"
-Loc="477 442 1076 841"
+Loc="1726 126 2325 525"
 State=1
 Number=0
 
