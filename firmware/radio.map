@@ -7,15 +7,11 @@ CABS                               0000   0000 =      0. bytes (ABS,CON,CODE)
 
       Value  Global
    --------  --------------------------------
-  0C:FFFFFF00    s_BSEG
   0C:0000    l_BIT_BANK
-  0C:0000    l_BSEG
-  0C:0000    l_BSEG_BYTES
   0C:0000    l_CABS
   0C:0000    l_GSINIT1
   0C:0000    l_GSINIT5
   0C:0000    l_IABS
-  0C:0000    l_ISEG
   0C:0000    l_PSEG
   0C:0000    l_REG_BANK_1
   0C:0000    l_REG_BANK_2
@@ -25,7 +21,7 @@ CABS                               0000   0000 =      0. bytes (ABS,CON,CODE)
   0C:0000    l_XINIT
   0C:0000    l_XISEG
   0C:0000    l__CODE
-  0C:0000    s_BSEG_BYTES
+  0C:0000    s_BSEG
   0C:0000    s_CABS
   0C:0000    s_DSEG
   0C:0000    s_HOME
@@ -33,40 +29,44 @@ CABS                               0000   0000 =      0. bytes (ABS,CON,CODE)
   0C:0000    s_ISEG
   0C:0000    s_REG_BANK_0
   0C:0000    s_XABS
+  0C:0002    l_BSEG_BYTES
   0C:0003    l_GSFINAL
   0C:0003    l_GSINIT0
+  0C:0006    l_ISEG
+  0C:0006    l_OSEG
   0C:0008    l_REG_BANK_0
   0C:0008    s_REG_BANK_1
-  0C:0009    l_GSINIT
+  0C:000A    l_BSEG
   0C:000A    l_GSINIT2
   0C:000B    l_HOME
-  0C:000B    l_OSEG
   0C:000B    s_GSINIT0
   0C:000E    s_GSINIT1
   0C:000E    s_GSINIT2
+  0C:0010    s_OSEG
   0C:0010    s_REG_BANK_2
+  0C:0012    l_GSINIT
   0C:0018    s_BIT_BANK
   0C:0018    s_GSINIT3
   0C:0018    s_REG_BANK_3
-  0C:001F    s_OSEG
+  0C:0020    s_BSEG_BYTES
   0C:0020    s__CODE
   0C:0022    l_GSINIT3
   0C:002A    l_GSINIT4
-  0C:002A    s_RSEG
-  0C:002A    s_SSEG
   0C:003A    s_GSINIT4
+  0C:0055    s_RSEG
+  0C:0055    s_SSEG
   0C:0064    s_GSINIT
   0C:0064    s_GSINIT5
-  0C:006D    s_GSFINAL
-  0C:0070    s_CSEG
-  0C:0080    l_DSEG
-  0C:00C2    l_CONST
-  0C:00D6    l_SSEG
+  0C:0076    s_GSFINAL
+  0C:0079    s_CSEG
+  0C:007C    l_DSEG
+  0C:00AB    l_SSEG
+  0C:00BB    l_CONST
   0C:00FF    l_XSEG
   0C:0100    l_IRAM
-  0C:077A    l_CSEG
-  0C:07EA    s_CONST
-  0C:08AC    s_XINIT
+  0C:0DB4    l_CSEG
+  0C:0E2D    s_CONST
+  0C:0EE8    s_XINIT
   0C:F000    s_PSEG
   0C:F000    s_XSEG
   0C:F0FF    s_XISEG
@@ -519,43 +519,48 @@ Hexadecimal
 
 Area                               Addr   Size   Decimal Bytes (Attributes)
 --------------------------------   ----   ----   ------- ----- ------------
-DSEG                               0000   0080 =    128. bytes (REL,CON)
+DSEG                               0000   007C =    124. bytes (REL,CON)
 
       Value  Global
    --------  --------------------------------
-     0009    _preamble
-     000C    _rssi_offset
-     000E    _sendllap_PARM_2
+     0008    _vsprintf_PARM_2
+     000B    _vsprintf_PARM_3
+     000F    _bp
+     0023    _preamble
+     0026    _rssi_offset
+     0028    _llapid
+     002B    _sendllap_PARM_2
+     0048    __print_format_PARM_2
+     004B    __print_format_PARM_3
+     004E    __print_format_PARM_4
 
 Hexadecimal
 
 Area                               Addr   Size   Decimal Bytes (Attributes)
 --------------------------------   ----   ----   ------- ----- ------------
-OSEG                               001F   000B =     11. bytes (REL,OVR)
+OSEG                               0010   0006 =      6. bytes (REL,OVR)
 
       Value  Global
    --------  --------------------------------
-     001F    __divsint_PARM_2
-     001F    __divuint_PARM_2
-     001F    __gptrput_PARM_2
-     001F    _memcpy_PARM_2
-     001F    _strncmp_PARM_2
-     0022    _memcpy_PARM_3
-     0022    _strncmp_PARM_3
-     0024    _memcpy_ret_1_1
-     0024    _strncmp_sloc0_1_0
-     0027    _memcpy_s_1_1
+     0010    __divsint_PARM_2
+     0010    __divuint_PARM_2
+     0010    __gptrput_PARM_2
+     0010    _calculate_digit_radix_1_1
+     0010    _strncmp_PARM_2
+     0011    _calculate_digit_i_1_1
+     0013    _strncmp_PARM_3
+     0015    _strncmp_sloc0_1_0
 
 
 Hexadecimal
 
 Area                               Addr   Size   Decimal Bytes (Attributes)
 --------------------------------   ----   ----   ------- ----- ------------
-SSEG                               002A   00D6 =    214. bytes (REL,OVR)
+SSEG                               0055   00AB =    171. bytes (REL,OVR)
 
       Value  Global
    --------  --------------------------------
-     002A    __start__stack
+     0055    __start__stack
 
 
 
@@ -611,32 +616,35 @@ Hexadecimal
 
 Area                               Addr   Size   Decimal Bytes (Attributes)
 --------------------------------   ----   ----   ------- ----- ------------
-CSEG                               0070   077A =   1914. bytes (REL,CON,CODE)
+CSEG                               0079   0DB4 =   3508. bytes (REL,CON,CODE)
 
       Value  Global
    --------  --------------------------------
-  0C:0070    _delay
-  0C:009C    _nibble_to_char
-  0C:00AF    _cons_putc
-  0C:00BB    _cons_puts
-  0C:00E6    _cons_putsln
-  0C:00F2    _cons_puthex8
-  0C:0111    _cons_puthex16
-  0C:0166    _convert_rssi
-  0C:01B4    _switchchange
-  0C:01FD    _rftxrx_isr
-  0C:0248    _sendpacket
-  0C:027E    _sendllap
-  0C:02E5    _getpacket
-  0C:0521    _radio_init
-  0C:062C    _main
-  0C:0679    _strncmp
-  0C:06F8    _memcpy
-  0C:0750    __gptrput
-  0C:0769    __divuint
-  0C:0792    __gptrget
-  0C:07AE    __divsint
-  0C:07E6    __sdcc_external_startup
+  0C:0079    _delay
+  0C:00A5    _nibble_to_char
+  0C:00B8    _cons_putc
+  0C:00C4    _cons_puts
+  0C:00EF    _cons_putsln
+  0C:00FB    _cons_puthex8
+  0C:011A    _cons_puthex16
+  0C:016F    _convert_rssi
+  0C:01BD    _switchchange
+  0C:0206    _rftxrx_isr
+  0C:0251    _sendpacket
+  0C:0287    _sendllap
+  0C:02FF    _getpacket
+  0C:053B    _radio_init
+  0C:0646    _main
+  0C:0693    _strncmp
+  0C:0712    __gptrput
+  0C:072B    __divuint
+  0C:07AD    _vsprintf
+  0C:07EA    _sprintf
+  0C:08CF    __print_format
+  0C:0DBD    _strlen
+  0C:0DD5    __gptrget
+  0C:0DF1    __divsint
+  0C:0E29    __sdcc_external_startup
 
 
 ASxxxx Linker V01.75 + NoICE + SDCC Feb 1999,  page 1.
@@ -649,11 +657,14 @@ Libraries Linked            [   object  file   ]
 
 /usr/bin/../share/sdcc/lib/small/libsdcc.lib    [     _strncmp.rel ]
 /usr/bin/../share/sdcc/lib/small/mcs51.lib    [     crtclear.rel ]
-/usr/bin/../share/sdcc/lib/small/libsdcc.lib    [      _memcpy.rel ]
 /usr/bin/../share/sdcc/lib/small/mcs51.lib    [     crtxinit.rel ]
 /usr/bin/../share/sdcc/lib/small/libsdcc.lib    [     _gptrput.rel ]
 /usr/bin/../share/sdcc/lib/small/mcs51.lib    [    crtxclear.rel ]
 /usr/bin/../share/sdcc/lib/small/libint.lib    [     _divuint.rel ]
+/usr/bin/../share/sdcc/lib/small/libsdcc.lib    [      sprintf.rel ]
+/usr/bin/../share/sdcc/lib/small/libsdcc.lib    [          _bp.rel ]
+/usr/bin/../share/sdcc/lib/small/libsdcc.lib    [ /0               ]
+/usr/bin/../share/sdcc/lib/small/libsdcc.lib    [      _strlen.rel ]
 /usr/bin/../share/sdcc/lib/small/mcs51.lib    [     crtstart.rel ]
 /usr/bin/../share/sdcc/lib/small/libsdcc.lib    [     _gptrget.rel ]
 /usr/bin/../share/sdcc/lib/small/libint.lib    [     _divsint.rel ]

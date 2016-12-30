@@ -1,7 +1,7 @@
 ;--------------------------------------------------------
 ; File Created by SDCC : free open source ANSI-C Compiler
-; Version 2.9.0 #5416 (Mar 26 2014) (UNIX)
-; This file was generated Mon Jul  4 17:32:12 2016
+; Version 2.9.0 #5416 (Jul  3 2016) (UNIX)
+; This file was generated Fri Dec 30 15:24:15 2016
 ;--------------------------------------------------------
 	.module radio
 	.optsdcc -mmcs51 --model-small
@@ -449,6 +449,7 @@
 	.globl _SYNC1
 	.globl _MDMCTRL0H
 	.globl _sendllap_PARM_2
+	.globl _llapid
 	.globl _rssi_offset
 	.globl _preamble
 	.globl _rftxrx_isr
@@ -700,6 +701,8 @@ _preamble::
 	.ds 3
 _rssi_offset::
 	.ds 2
+_llapid::
+	.ds 3
 _sendllap_PARM_2:
 	.ds 2
 _getpacket_llapmsg_1_1:
@@ -984,6 +987,10 @@ __interrupt_vect:
 	mov	_preamble,#0x0E
 	mov	(_preamble + 0x0001),#0x5A
 	mov	(_preamble + 0x0002),#0xA5
+;	radio.c:14: char llapid[] = "LA";
+	mov	_llapid,#0x4C
+	mov	(_llapid + 0x0001),#0x41
+	mov	(_llapid + 0x0002),#0x00
 	.area GSFINAL (CODE)
 	ljmp	__sdcc_program_startup
 ;--------------------------------------------------------
@@ -1006,7 +1013,7 @@ __sdcc_program_startup:
 ;i                         Allocated to registers r4 r5 
 ;j                         Allocated to registers r6 r7 
 ;------------------------------------------------------------
-;	radio.c:15: void delay(int msec) {
+;	radio.c:16: void delay(int msec) {
 ;	-----------------------------------------
 ;	 function delay
 ;	-----------------------------------------
@@ -1021,7 +1028,7 @@ _delay:
 	ar1 = 0x01
 	mov	r2,dpl
 	mov	r3,dph
-;	radio.c:18: for (i=0; i<msec; i++)
+;	radio.c:19: for (i=0; i<msec; i++)
 	mov	r4,#0x00
 	mov	r5,#0x00
 00104$:
@@ -1034,7 +1041,7 @@ _delay:
 	xrl	b,#0x80
 	subb	a,b
 	jnc	00108$
-;	radio.c:19: for (j=0; j<1000; j++);
+;	radio.c:20: for (j=0; j<1000; j++);
 	mov	r6,#0xE8
 	mov	r7,#0x03
 00103$:
@@ -1045,7 +1052,7 @@ _delay:
 	mov	a,r6
 	orl	a,r7
 	jnz	00103$
-;	radio.c:18: for (i=0; i<msec; i++)
+;	radio.c:19: for (i=0; i<msec; i++)
 	inc	r4
 	cjne	r4,#0x00,00104$
 	inc	r5
@@ -1057,23 +1064,23 @@ _delay:
 ;------------------------------------------------------------
 ;nibble                    Allocated to registers r2 
 ;------------------------------------------------------------
-;	radio.c:22: char nibble_to_char(uint8_t nibble) {
+;	radio.c:23: char nibble_to_char(uint8_t nibble) {
 ;	-----------------------------------------
 ;	 function nibble_to_char
 ;	-----------------------------------------
 _nibble_to_char:
 	mov	r2,dpl
-;	radio.c:23: if (nibble < 0xA)
+;	radio.c:24: if (nibble < 0xA)
 	cjne	r2,#0x0A,00106$
 00106$:
 	jnc	00102$
-;	radio.c:24: return nibble + '0';
+;	radio.c:25: return nibble + '0';
 	mov	a,#0x30
 	add	a,r2
 	mov	dpl,a
 	ret
 00102$:
-;	radio.c:25: return nibble - 0xA + 'A';
+;	radio.c:26: return nibble - 0xA + 'A';
 	mov	a,#0x37
 	add	a,r2
 	mov	dpl,a
@@ -1083,17 +1090,17 @@ _nibble_to_char:
 ;------------------------------------------------------------
 ;ch                        Allocated to registers 
 ;------------------------------------------------------------
-;	radio.c:28: void cons_putc(uint8_t ch) {
+;	radio.c:29: void cons_putc(uint8_t ch) {
 ;	-----------------------------------------
 ;	 function cons_putc
 ;	-----------------------------------------
 _cons_putc:
 	mov	_U0DBUF,dpl
-;	radio.c:30: while(!(U0CSR & U0CSR_TX_BYTE)); // wait for byte to be transmitted                                                                     
+;	radio.c:31: while(!(U0CSR & U0CSR_TX_BYTE)); // wait for byte to be transmitted                                                                     
 00101$:
 	mov	a,_U0CSR
 	jnb	acc.1,00101$
-;	radio.c:31: U0CSR &= ~U0CSR_TX_BYTE;         // Clear transmit byte status                                                                          
+;	radio.c:32: U0CSR &= ~U0CSR_TX_BYTE;         // Clear transmit byte status                                                                          
 	anl	_U0CSR,#0xFD
 	ret
 ;------------------------------------------------------------
@@ -1101,7 +1108,7 @@ _cons_putc:
 ;------------------------------------------------------------
 ;s                         Allocated to registers r2 r3 r4 
 ;------------------------------------------------------------
-;	radio.c:34: void cons_puts(const char *s)
+;	radio.c:35: void cons_puts(const char *s)
 ;	-----------------------------------------
 ;	 function cons_puts
 ;	-----------------------------------------
@@ -1109,7 +1116,7 @@ _cons_puts:
 	mov	r2,dpl
 	mov	r3,dph
 	mov	r4,b
-;	radio.c:36: while(0 != *s)
+;	radio.c:37: while(0 != *s)
 00101$:
 	mov	dpl,r2
 	mov	dph,r3
@@ -1117,7 +1124,7 @@ _cons_puts:
 	lcall	__gptrget
 	mov	r5,a
 	jz	00104$
-;	radio.c:37: cons_putc((uint8_t)(*s++));
+;	radio.c:38: cons_putc((uint8_t)(*s++));
 	mov	dpl,r5
 	inc	r2
 	cjne	r2,#0x00,00110$
@@ -1138,14 +1145,14 @@ _cons_puts:
 ;------------------------------------------------------------
 ;s                         Allocated to registers r2 r3 r4 
 ;------------------------------------------------------------
-;	radio.c:40: void cons_putsln(const char *s)
+;	radio.c:41: void cons_putsln(const char *s)
 ;	-----------------------------------------
 ;	 function cons_putsln
 ;	-----------------------------------------
 _cons_putsln:
-;	radio.c:42: cons_puts(s);
+;	radio.c:43: cons_puts(s);
 	lcall	_cons_puts
-;	radio.c:43: cons_puts("\r\n");
+;	radio.c:44: cons_puts("\r\n");
 	mov	dptr,#__str_0
 	mov	b,#0x80
 	ljmp	_cons_puts
@@ -1154,13 +1161,13 @@ _cons_putsln:
 ;------------------------------------------------------------
 ;h                         Allocated to registers r2 
 ;------------------------------------------------------------
-;	radio.c:46: void cons_puthex8(uint8_t h) {
+;	radio.c:47: void cons_puthex8(uint8_t h) {
 ;	-----------------------------------------
 ;	 function cons_puthex8
 ;	-----------------------------------------
 _cons_puthex8:
 	mov	r2,dpl
-;	radio.c:47: cons_putc(nibble_to_char((h & 0xF0)>>4));
+;	radio.c:48: cons_putc(nibble_to_char((h & 0xF0)>>4));
 	mov	a,#0xF0
 	anl	a,r2
 	swap	a
@@ -1170,7 +1177,7 @@ _cons_puthex8:
 	lcall	_nibble_to_char
 	lcall	_cons_putc
 	pop	ar2
-;	radio.c:48: cons_putc(nibble_to_char(h & 0x0F));
+;	radio.c:49: cons_putc(nibble_to_char(h & 0x0F));
 	mov	a,#0x0F
 	anl	a,r2
 	mov	dpl,a
@@ -1181,14 +1188,14 @@ _cons_puthex8:
 ;------------------------------------------------------------
 ;h                         Allocated to registers r2 r3 
 ;------------------------------------------------------------
-;	radio.c:51: void cons_puthex16(uint16_t h)
+;	radio.c:52: void cons_puthex16(uint16_t h)
 ;	-----------------------------------------
 ;	 function cons_puthex16
 ;	-----------------------------------------
 _cons_puthex16:
 	mov	r2,dpl
 	mov	r3,dph
-;	radio.c:53: cons_putc(nibble_to_char((h & 0xF000)>>12));
+;	radio.c:54: cons_putc(nibble_to_char((h & 0xF000)>>12));
 	mov	a,#0xF0
 	anl	a,r3
 	swap	a
@@ -1199,7 +1206,7 @@ _cons_puthex16:
 	lcall	_nibble_to_char
 	lcall	_cons_putc
 	pop	ar3
-;	radio.c:54: cons_putc(nibble_to_char((h & 0x0F00)>>8));
+;	radio.c:55: cons_putc(nibble_to_char((h & 0x0F00)>>8));
 	mov	a,#0x0F
 	anl	a,r3
 	mov	dpl,a
@@ -1208,7 +1215,7 @@ _cons_puthex16:
 	lcall	_cons_putc
 	pop	ar3
 	pop	ar2
-;	radio.c:55: cons_putc(nibble_to_char((h & 0x00F0)>>4));
+;	radio.c:56: cons_putc(nibble_to_char((h & 0x00F0)>>4));
 	mov	a,#0xF0
 	anl	a,r2
 	mov	r4,a
@@ -1230,7 +1237,7 @@ _cons_puthex16:
 	lcall	_cons_putc
 	pop	ar3
 	pop	ar2
-;	radio.c:56: cons_putc(nibble_to_char(h & 0x000F));
+;	radio.c:57: cons_putc(nibble_to_char(h & 0x000F));
 	anl	ar2,#0x0F
 	mov	dpl,r2
 	lcall	_nibble_to_char
@@ -1241,15 +1248,15 @@ _cons_puthex16:
 ;rssi_raw                  Allocated to registers r2 
 ;rssi_dec                  Allocated to registers r2 r3 
 ;------------------------------------------------------------
-;	radio.c:59: int convert_rssi(uint8_t rssi_raw) {
+;	radio.c:60: int convert_rssi(uint8_t rssi_raw) {
 ;	-----------------------------------------
 ;	 function convert_rssi
 ;	-----------------------------------------
 _convert_rssi:
 	mov	r2,dpl
-;	radio.c:60: int rssi_dec = (int) rssi_raw;
+;	radio.c:61: int rssi_dec = (int) rssi_raw;
 	mov	r3,#0x00
-;	radio.c:62: if (rssi_dec < 128) {
+;	radio.c:63: if (rssi_dec < 128) {
 	clr	c
 	mov	a,r2
 	subb	a,#0x80
@@ -1257,7 +1264,7 @@ _convert_rssi:
 	xrl	a,#0x80
 	subb	a,#0x80
 	jnc	00102$
-;	radio.c:63: return (rssi_dec / 2) - rssi_offset;
+;	radio.c:64: return (rssi_dec / 2) - rssi_offset;
 	mov	__divsint_PARM_2,#0x02
 	clr	a
 	mov	(__divsint_PARM_2 + 1),a
@@ -1274,7 +1281,7 @@ _convert_rssi:
 	mov	dph,a
 	ret
 00102$:
-;	radio.c:66: return ((rssi_dec - 256) / 2) - rssi_offset;
+;	radio.c:67: return ((rssi_dec - 256) / 2) - rssi_offset;
 	mov	dpl,r2
 	mov	a,r3
 	add	a,#0xff
@@ -1297,12 +1304,12 @@ _convert_rssi:
 ;------------------------------------------------------------
 ;prevstate                 Allocated to registers r2 r3 r4 
 ;------------------------------------------------------------
-;	radio.c:70: void switchchange(int *prevstate) {
+;	radio.c:71: void switchchange(int *prevstate) {
 ;	-----------------------------------------
 ;	 function switchchange
 ;	-----------------------------------------
 _switchchange:
-;	radio.c:71: if (P1_6 != *prevstate) {
+;	radio.c:72: if (P1_6 != *prevstate) {
 	mov	r2,dpl
 	mov	r3,dph
 	mov	r4,b
@@ -1321,9 +1328,9 @@ _switchchange:
 	cjne	a,ar6,00106$
 	sjmp	00102$
 00106$:
-;	radio.c:72: P1_3 ^= 1;
+;	radio.c:73: P1_3 ^= 1;
 	cpl	_P1_3
-;	radio.c:73: delay(100); // crap debounce
+;	radio.c:74: delay(100); // crap debounce
 	mov	dptr,#0x0064
 	push	ar2
 	push	ar3
@@ -1333,7 +1340,7 @@ _switchchange:
 	pop	ar3
 	pop	ar2
 00102$:
-;	radio.c:75: *prevstate = P1_6;
+;	radio.c:76: *prevstate = P1_6;
 	mov	c,_P1_6
 	clr	a
 	rlc	a
@@ -1351,7 +1358,7 @@ _switchchange:
 ;Allocation info for local variables in function 'rftxrx_isr'
 ;------------------------------------------------------------
 ;------------------------------------------------------------
-;	radio.c:78: void rftxrx_isr(void) __interrupt RFTXRX_VECTOR {
+;	radio.c:79: void rftxrx_isr(void) __interrupt RFTXRX_VECTOR {
 ;	-----------------------------------------
 ;	 function rftxrx_isr
 ;	-----------------------------------------
@@ -1362,18 +1369,18 @@ _rftxrx_isr:
 	push	ar2
 	push	psw
 	mov	psw,#0x00
-;	radio.c:79: switch (MARCSTATE) {
+;	radio.c:80: switch (MARCSTATE) {
 	mov	dptr,#_MARCSTATE
 	movx	a,@dptr
 	mov	r2,a
 	cjne	r2,#0x0D,00108$
 	sjmp	00101$
 00108$:
-;	radio.c:80: case MARC_STATE_RX:
+;	radio.c:81: case MARC_STATE_RX:
 	cjne	r2,#0x13,00104$
 	sjmp	00102$
 00101$:
-;	radio.c:82: packet[packet_index++] = RFD;
+;	radio.c:83: packet[packet_index++] = RFD;
 	mov	r2,_packet_index
 	inc	_packet_index
 	mov	a,r2
@@ -1384,11 +1391,11 @@ _rftxrx_isr:
 	mov	dph,a
 	mov	a,_RFD
 	movx	@dptr,a
-;	radio.c:83: break;
-;	radio.c:84: case MARC_STATE_TX:
+;	radio.c:84: break;
+;	radio.c:85: case MARC_STATE_TX:
 	sjmp	00104$
 00102$:
-;	radio.c:86: RFD = packet[packet_index++];
+;	radio.c:87: RFD = packet[packet_index++];
 	mov	r2,_packet_index
 	inc	_packet_index
 	mov	a,r2
@@ -1399,7 +1406,7 @@ _rftxrx_isr:
 	mov	dph,a
 	movx	a,@dptr
 	mov	_RFD,a
-;	radio.c:88: } 
+;	radio.c:89: } 
 00104$:
 	pop	psw
 	pop	ar2
@@ -1412,43 +1419,43 @@ _rftxrx_isr:
 ;Allocation info for local variables in function 'sendpacket'
 ;------------------------------------------------------------
 ;------------------------------------------------------------
-;	radio.c:91: void sendpacket() {
+;	radio.c:92: void sendpacket() {
 ;	-----------------------------------------
 ;	 function sendpacket
 ;	-----------------------------------------
 _sendpacket:
-;	radio.c:92: cons_putsln("Start TX");
+;	radio.c:93: cons_putsln("Start TX");
 	mov	dptr,#__str_1
 	mov	b,#0x80
 	lcall	_cons_putsln
-;	radio.c:94: T3CTL=0xDC;
+;	radio.c:95: T3CTL=0xDC;
 	mov	_T3CTL,#0xDC
-;	radio.c:95: T3OVFIF=0; 
+;	radio.c:96: T3OVFIF=0; 
 	clr	_T3OVFIF
-;	radio.c:96: while (!T3OVFIF);
+;	radio.c:97: while (!T3OVFIF);
 00101$:
 	jnb	_T3OVFIF,00101$
-;	radio.c:97: T3CTL=0;
+;	radio.c:98: T3CTL=0;
 	mov	_T3CTL,#0x00
-;	radio.c:104: packet_index = 0;
+;	radio.c:105: packet_index = 0;
 	mov	_packet_index,#0x00
-;	radio.c:105: RFST = RFST_STX;
+;	radio.c:106: RFST = RFST_STX;
 	mov	_RFST,#0x03
-;	radio.c:106: while (MARCSTATE != MARC_STATE_TX);
+;	radio.c:107: while (MARCSTATE != MARC_STATE_TX);
 00104$:
 	mov	dptr,#_MARCSTATE
 	movx	a,@dptr
 	mov	r2,a
 	cjne	r2,#0x13,00104$
-;	radio.c:108: while (MARCSTATE != MARC_STATE_IDLE);
+;	radio.c:109: while (MARCSTATE != MARC_STATE_IDLE);
 00107$:
 	mov	dptr,#_MARCSTATE
 	movx	a,@dptr
 	mov	r2,a
 	cjne	r2,#0x01,00107$
-;	radio.c:109: RFIF=0;
+;	radio.c:110: RFIF=0;
 	mov	_RFIF,#0x00
-;	radio.c:110: cons_putsln("Done TX");
+;	radio.c:111: cons_putsln("Done TX");
 	mov	dptr,#__str_2
 	mov	b,#0x80
 	ljmp	_cons_putsln
@@ -1459,7 +1466,7 @@ _sendpacket:
 ;m                         Allocated to registers r2 r3 r4 
 ;i                         Allocated to registers r2 r3 
 ;------------------------------------------------------------
-;	radio.c:113: void sendllap(char *m, int count) {
+;	radio.c:114: void sendllap(char *m, int count) {
 ;	-----------------------------------------
 ;	 function sendllap
 ;	-----------------------------------------
@@ -1467,33 +1474,45 @@ _sendllap:
 	mov	r2,dpl
 	mov	r3,dph
 	mov	r4,b
-;	radio.c:117: memcpy(packet, preamble, sizeof(preamble)/sizeof(uint8_t));
-	mov	_memcpy_PARM_2,#_preamble
-	mov	(_memcpy_PARM_2 + 1),#0x00
-	mov	(_memcpy_PARM_2 + 2),#0x40
-	mov	_memcpy_PARM_3,#0x03
-	clr	a
-	mov	(_memcpy_PARM_3 + 1),a
-	mov	dptr,#_packet
-	mov	b,#0x00
+;	radio.c:125: sprintf(packet, "%s%s%s%s", preamble, "a", llapid, m);
 	push	ar2
 	push	ar3
 	push	ar4
-	lcall	_memcpy
-	pop	ar4
-	pop	ar3
-	pop	ar2
-;	radio.c:119: memcpy(packet+sizeof(preamble)/sizeof(uint8_t), m, 12);
-	mov	_memcpy_PARM_2,r2
-	mov	(_memcpy_PARM_2 + 1),r3
-	mov	(_memcpy_PARM_2 + 2),r4
-	mov	_memcpy_PARM_3,#0x0C
+	mov	a,#_llapid
+	push	acc
+	mov	a,#(_llapid >> 8)
+	push	acc
+	mov	a,#0x40
+	push	acc
+	mov	a,#__str_4
+	push	acc
+	mov	a,#(__str_4 >> 8)
+	push	acc
+	mov	a,#0x80
+	push	acc
+	mov	a,#_preamble
+	push	acc
+	mov	a,#(_preamble >> 8)
+	push	acc
+	mov	a,#0x40
+	push	acc
+	mov	a,#__str_3
+	push	acc
+	mov	a,#(__str_3 >> 8)
+	push	acc
+	mov	a,#0x80
+	push	acc
+	mov	a,#_packet
+	push	acc
+	mov	a,#(_packet >> 8)
+	push	acc
 	clr	a
-	mov	(_memcpy_PARM_3 + 1),a
-	mov	dptr,#(_packet + 0x0003)
-	mov	b,#0x00
-	lcall	_memcpy
-;	radio.c:121: for (i=0; i<count; i++)
+	push	acc
+	lcall	_sprintf
+	mov	a,sp
+	add	a,#0xee
+	mov	sp,a
+;	radio.c:127: for (i=0; i<count; i++)
 	mov	r2,#0x00
 	mov	r3,#0x00
 00101$:
@@ -1506,13 +1525,13 @@ _sendllap:
 	xrl	b,#0x80
 	subb	a,b
 	jnc	00105$
-;	radio.c:122: sendpacket();
+;	radio.c:128: sendpacket();
 	push	ar2
 	push	ar3
 	lcall	_sendpacket
 	pop	ar3
 	pop	ar2
-;	radio.c:121: for (i=0; i<count; i++)
+;	radio.c:127: for (i=0; i<count; i++)
 	inc	r2
 	cjne	r2,#0x00,00101$
 	inc	r3
@@ -1525,46 +1544,46 @@ _sendllap:
 ;llapmsg                   Allocated with name '_getpacket_llapmsg_1_1'
 ;n                         Allocated to registers r2 r3 
 ;------------------------------------------------------------
-;	radio.c:125: void getpacket() {
+;	radio.c:131: void getpacket() {
 ;	-----------------------------------------
 ;	 function getpacket
 ;	-----------------------------------------
 _getpacket:
-;	radio.c:127: if (RFIF & RFIF_IRQ_DONE) {
+;	radio.c:133: if (RFIF & RFIF_IRQ_DONE) {
 	mov	a,_RFIF
 	jb	acc.4,00150$
 	ljmp	00127$
 00150$:
-;	radio.c:130: RFIF = 0;
+;	radio.c:136: RFIF = 0;
 	mov	_RFIF,#0x00
-;	radio.c:137: cons_putsln("New Packet:");
-	mov	dptr,#__str_3
+;	radio.c:143: cons_putsln("New Packet:");
+	mov	dptr,#__str_5
 	mov	b,#0x80
 	lcall	_cons_putsln
-;	radio.c:139: cons_puthex8(packet[0]);
+;	radio.c:145: cons_puthex8(packet[0]);
 	mov	dptr,#_packet
 	movx	a,@dptr
 	mov	dpl,a
 	lcall	_cons_puthex8
-;	radio.c:140: cons_putsln("");
-	mov	dptr,#__str_4
+;	radio.c:146: cons_putsln("");
+	mov	dptr,#__str_6
 	mov	b,#0x80
 	lcall	_cons_putsln
-;	radio.c:142: cons_puthex8(packet[1]);
+;	radio.c:148: cons_puthex8(packet[1]);
 	mov	dptr,#(_packet + 0x0001)
 	movx	a,@dptr
 	mov	dpl,a
 	lcall	_cons_puthex8
-;	radio.c:143: cons_puthex8(packet[2]);
+;	radio.c:149: cons_puthex8(packet[2]);
 	mov	dptr,#(_packet + 0x0002)
 	movx	a,@dptr
 	mov	dpl,a
 	lcall	_cons_puthex8
-;	radio.c:144: cons_putsln("");
-	mov	dptr,#__str_4
+;	radio.c:150: cons_putsln("");
+	mov	dptr,#__str_6
 	mov	b,#0x80
 	lcall	_cons_putsln
-;	radio.c:148: while(n < (packet[0]+1)) {
+;	radio.c:154: while(n < (packet[0]+1)) {
 	mov	r2,#0x03
 	mov	r3,#0x00
 00101$:
@@ -1582,7 +1601,7 @@ _getpacket:
 	mov	a,r3
 	subb	a,r5
 	jnc	00103$
-;	radio.c:149: llapmsg[n-3] = packet[n];
+;	radio.c:155: llapmsg[n-3] = packet[n];
 	mov	ar4,r2
 	mov	a,r4
 	add	a,#0xfd+_getpacket_llapmsg_1_1
@@ -1595,7 +1614,7 @@ _getpacket:
 	mov	dph,a
 	movx	a,@dptr
 	mov	@r0,a
-;	radio.c:150: cons_putc(packet[n++]);
+;	radio.c:156: cons_putc(packet[n++]);
 	mov	ar4,r2
 	mov	ar5,r3
 	inc	r2
@@ -1617,53 +1636,53 @@ _getpacket:
 	pop	ar2
 	sjmp	00101$
 00103$:
-;	radio.c:152: llapmsg[12] = '\0';
+;	radio.c:158: llapmsg[12] = '\0';
 	mov	(_getpacket_llapmsg_1_1 + 0x000c),#0x00
-;	radio.c:154: cons_putsln("");
-	mov	dptr,#__str_4
+;	radio.c:160: cons_putsln("");
+	mov	dptr,#__str_6
 	mov	b,#0x80
 	lcall	_cons_putsln
-;	radio.c:155: cons_puts("RSSI: ");
-	mov	dptr,#__str_5
+;	radio.c:161: cons_puts("RSSI: ");
+	mov	dptr,#__str_7
 	mov	b,#0x80
 	lcall	_cons_puts
-;	radio.c:156: cons_puthex8(RSSI);
+;	radio.c:162: cons_puthex8(RSSI);
 	mov	dptr,#_RSSI
 	movx	a,@dptr
 	mov	dpl,a
 	lcall	_cons_puthex8
-;	radio.c:158: cons_puts(" LQI: ");
-	mov	dptr,#__str_6
+;	radio.c:164: cons_puts(" LQI: ");
+	mov	dptr,#__str_8
 	mov	b,#0x80
 	lcall	_cons_puts
-;	radio.c:159: cons_puthex8(LQI);
+;	radio.c:165: cons_puthex8(LQI);
 	mov	dptr,#_LQI
 	movx	a,@dptr
 	mov	dpl,a
 	lcall	_cons_puthex8
-;	radio.c:160: cons_putsln("");
-	mov	dptr,#__str_4
+;	radio.c:166: cons_putsln("");
+	mov	dptr,#__str_6
 	mov	b,#0x80
 	lcall	_cons_putsln
-;	radio.c:162: if (PKTSTATUS & 0x80) {
+;	radio.c:168: if (PKTSTATUS & 0x80) {
 	mov	dptr,#_PKTSTATUS
 	movx	a,@dptr
 	mov	r2,a
 	jnb	acc.7,00105$
-;	radio.c:163: cons_putsln("CRC: OK");
-	mov	dptr,#__str_7
+;	radio.c:169: cons_putsln("CRC: OK");
+	mov	dptr,#__str_9
 	mov	b,#0x80
 	lcall	_cons_putsln
 	sjmp	00106$
 00105$:
-;	radio.c:166: cons_putsln("CRC: Fail");
-	mov	dptr,#__str_8
+;	radio.c:172: cons_putsln("CRC: Fail");
+	mov	dptr,#__str_10
 	mov	b,#0x80
 	lcall	_cons_putsln
 00106$:
-;	radio.c:170: if (strncmp(llapmsg, "aLL", 3) == 0) {
-	mov	_strncmp_PARM_2,#__str_9
-	mov	(_strncmp_PARM_2 + 1),#(__str_9 >> 8)
+;	radio.c:176: if (strncmp(llapmsg, "aLL", 3) == 0) {
+	mov	_strncmp_PARM_2,#__str_11
+	mov	(_strncmp_PARM_2 + 1),#(__str_11 >> 8)
 	mov	(_strncmp_PARM_2 + 2),#0x80
 	mov	_strncmp_PARM_3,#0x03
 	clr	a
@@ -1677,57 +1696,7 @@ _getpacket:
 	jz	00155$
 	ljmp	00127$
 00155$:
-;	radio.c:172: if (strncmp(llapmsg+3, "LEDON----", 9) == 0) {
-	mov	_strncmp_PARM_2,#__str_10
-	mov	(_strncmp_PARM_2 + 1),#(__str_10 >> 8)
-	mov	(_strncmp_PARM_2 + 2),#0x80
-	mov	_strncmp_PARM_3,#0x09
-	clr	a
-	mov	(_strncmp_PARM_3 + 1),a
-	mov	dptr,#(_getpacket_llapmsg_1_1 + 0x0003)
-	mov	b,#0x40
-	lcall	_strncmp
-	mov	a,dpl
-	mov	b,dph
-	orl	a,b
-	jnz	00122$
-;	radio.c:173: sendllap(llapmsg, 1);
-	mov	_sendllap_PARM_2,#0x01
-	clr	a
-	mov	(_sendllap_PARM_2 + 1),a
-	mov	dptr,#_getpacket_llapmsg_1_1
-	mov	b,#0x40
-	lcall	_sendllap
-;	radio.c:174: P1_3 = 1; // turn on
-	setb	_P1_3
-	ljmp	00127$
-00122$:
-;	radio.c:175: } else if (strncmp(llapmsg+3, "LEDOFF---", 9) == 0) {
-	mov	_strncmp_PARM_2,#__str_11
-	mov	(_strncmp_PARM_2 + 1),#(__str_11 >> 8)
-	mov	(_strncmp_PARM_2 + 2),#0x80
-	mov	_strncmp_PARM_3,#0x09
-	clr	a
-	mov	(_strncmp_PARM_3 + 1),a
-	mov	dptr,#(_getpacket_llapmsg_1_1 + 0x0003)
-	mov	b,#0x40
-	lcall	_strncmp
-	mov	a,dpl
-	mov	b,dph
-	orl	a,b
-	jnz	00119$
-;	radio.c:176: sendllap(llapmsg, 1);
-	mov	_sendllap_PARM_2,#0x01
-	clr	a
-	mov	(_sendllap_PARM_2 + 1),a
-	mov	dptr,#_getpacket_llapmsg_1_1
-	mov	b,#0x40
-	lcall	_sendllap
-;	radio.c:177: P1_3 = 0; // turn off
-	clr	_P1_3
-	ljmp	00127$
-00119$:
-;	radio.c:178: } else if (strncmp(llapmsg+3, "HELLO----", 9) == 0) {
+;	radio.c:178: if (strncmp(llapmsg+3, "LEDON----", 9) == 0) {
 	mov	_strncmp_PARM_2,#__str_12
 	mov	(_strncmp_PARM_2 + 1),#(__str_12 >> 8)
 	mov	(_strncmp_PARM_2 + 2),#0x80
@@ -1740,17 +1709,19 @@ _getpacket:
 	mov	a,dpl
 	mov	b,dph
 	orl	a,b
-	jnz	00116$
-;	radio.c:180: sendllap(llapmsg, 1);
+	jnz	00122$
+;	radio.c:179: sendllap(llapmsg, 1);
 	mov	_sendllap_PARM_2,#0x01
 	clr	a
 	mov	(_sendllap_PARM_2 + 1),a
 	mov	dptr,#_getpacket_llapmsg_1_1
 	mov	b,#0x40
 	lcall	_sendllap
+;	radio.c:180: P1_3 = 1; // turn on
+	setb	_P1_3
 	ljmp	00127$
-00116$:
-;	radio.c:181: } else if (strncmp(llapmsg+3, "REBOOT---", 9) == 0) {
+00122$:
+;	radio.c:181: } else if (strncmp(llapmsg+3, "LEDOFF---", 9) == 0) {
 	mov	_strncmp_PARM_2,#__str_13
 	mov	(_strncmp_PARM_2 + 1),#(__str_13 >> 8)
 	mov	(_strncmp_PARM_2 + 2),#0x80
@@ -1763,19 +1734,19 @@ _getpacket:
 	mov	a,dpl
 	mov	b,dph
 	orl	a,b
-	jnz	00113$
-;	radio.c:183: sendllap(llapmsg, 1);
+	jnz	00119$
+;	radio.c:182: sendllap(llapmsg, 1);
 	mov	_sendllap_PARM_2,#0x01
 	clr	a
 	mov	(_sendllap_PARM_2 + 1),a
 	mov	dptr,#_getpacket_llapmsg_1_1
 	mov	b,#0x40
 	lcall	_sendllap
-;	radio.c:184: __asm LCALL 0x0 __endasm;
-	 LCALL 0x0 
-	sjmp	00127$
-00113$:
-;	radio.c:185: } else if (strncmp(llapmsg+3, "LED------", 9) == 0) {
+;	radio.c:183: P1_3 = 0; // turn off
+	clr	_P1_3
+	ljmp	00127$
+00119$:
+;	radio.c:184: } else if (strncmp(llapmsg+3, "HELLO----", 9) == 0) {
 	mov	_strncmp_PARM_2,#__str_14
 	mov	(_strncmp_PARM_2 + 1),#(__str_14 >> 8)
 	mov	(_strncmp_PARM_2 + 2),#0x80
@@ -1788,44 +1759,92 @@ _getpacket:
 	mov	a,dpl
 	mov	b,dph
 	orl	a,b
-	jnz	00127$
-;	radio.c:187: if (P1_3 == 0) {
-	jb	_P1_3,00108$
-;	radio.c:188: sendllap("aLLLEDOFF---", 1);
+	jnz	00116$
+;	radio.c:186: sendllap(llapmsg, 1);
 	mov	_sendllap_PARM_2,#0x01
 	clr	a
 	mov	(_sendllap_PARM_2 + 1),a
-	mov	dptr,#__str_15
+	mov	dptr,#_getpacket_llapmsg_1_1
+	mov	b,#0x40
+	lcall	_sendllap
+	ljmp	00127$
+00116$:
+;	radio.c:187: } else if (strncmp(llapmsg+3, "REBOOT---", 9) == 0) {
+	mov	_strncmp_PARM_2,#__str_15
+	mov	(_strncmp_PARM_2 + 1),#(__str_15 >> 8)
+	mov	(_strncmp_PARM_2 + 2),#0x80
+	mov	_strncmp_PARM_3,#0x09
+	clr	a
+	mov	(_strncmp_PARM_3 + 1),a
+	mov	dptr,#(_getpacket_llapmsg_1_1 + 0x0003)
+	mov	b,#0x40
+	lcall	_strncmp
+	mov	a,dpl
+	mov	b,dph
+	orl	a,b
+	jnz	00113$
+;	radio.c:189: sendllap(llapmsg, 1);
+	mov	_sendllap_PARM_2,#0x01
+	clr	a
+	mov	(_sendllap_PARM_2 + 1),a
+	mov	dptr,#_getpacket_llapmsg_1_1
+	mov	b,#0x40
+	lcall	_sendllap
+;	radio.c:190: __asm LCALL 0x0 __endasm;
+	 LCALL 0x0 
+	sjmp	00127$
+00113$:
+;	radio.c:191: } else if (strncmp(llapmsg+3, "LED------", 9) == 0) {
+	mov	_strncmp_PARM_2,#__str_16
+	mov	(_strncmp_PARM_2 + 1),#(__str_16 >> 8)
+	mov	(_strncmp_PARM_2 + 2),#0x80
+	mov	_strncmp_PARM_3,#0x09
+	clr	a
+	mov	(_strncmp_PARM_3 + 1),a
+	mov	dptr,#(_getpacket_llapmsg_1_1 + 0x0003)
+	mov	b,#0x40
+	lcall	_strncmp
+	mov	a,dpl
+	mov	b,dph
+	orl	a,b
+	jnz	00127$
+;	radio.c:193: if (P1_3 == 0) {
+	jb	_P1_3,00108$
+;	radio.c:194: sendllap("LEDOFF---", 1);
+	mov	_sendllap_PARM_2,#0x01
+	clr	a
+	mov	(_sendllap_PARM_2 + 1),a
+	mov	dptr,#__str_13
 	mov	b,#0x80
 	lcall	_sendllap
 	sjmp	00127$
 00108$:
-;	radio.c:190: sendllap("aLLLEDON----", 1);
+;	radio.c:196: sendllap("LEDON----", 1);
 	mov	_sendllap_PARM_2,#0x01
 	clr	a
 	mov	(_sendllap_PARM_2 + 1),a
-	mov	dptr,#__str_16
+	mov	dptr,#__str_12
 	mov	b,#0x80
 	lcall	_sendllap
 00127$:
-;	radio.c:195: if (MARCSTATE != MARC_STATE_RX) {
+;	radio.c:201: if (MARCSTATE != MARC_STATE_RX) {
 	mov	dptr,#_MARCSTATE
 	movx	a,@dptr
 	mov	r2,a
 	cjne	r2,#0x0D,00162$
 	ret
 00162$:
-;	radio.c:196: packet_index = 0;
+;	radio.c:202: packet_index = 0;
 	mov	_packet_index,#0x00
-;	radio.c:197: RFST = RFST_SRX;
+;	radio.c:203: RFST = RFST_SRX;
 	mov	_RFST,#0x02
-;	radio.c:198: while (MARCSTATE != MARC_STATE_RX);
+;	radio.c:204: while (MARCSTATE != MARC_STATE_RX);
 00128$:
 	mov	dptr,#_MARCSTATE
 	movx	a,@dptr
 	mov	r2,a
 	cjne	r2,#0x0D,00128$
-;	radio.c:199: cons_putsln("Waiting to receive...");
+;	radio.c:205: cons_putsln("Waiting to receive...");
 	mov	dptr,#__str_17
 	mov	b,#0x80
 	ljmp	_cons_putsln
@@ -1833,18 +1852,18 @@ _getpacket:
 ;Allocation info for local variables in function 'radio_init'
 ;------------------------------------------------------------
 ;------------------------------------------------------------
-;	radio.c:203: void radio_init(void) {
+;	radio.c:209: void radio_init(void) {
 ;	-----------------------------------------
 ;	 function radio_init
 ;	-----------------------------------------
 _radio_init:
-;	radio.c:206: SLEEP &= ~SLEEP_OSC_PD;
+;	radio.c:212: SLEEP &= ~SLEEP_OSC_PD;
 	anl	_SLEEP,#0xFB
-;	radio.c:208: while( !(SLEEP & SLEEP_XOSC_S) ); 
+;	radio.c:214: while( !(SLEEP & SLEEP_XOSC_S) ); 
 00101$:
 	mov	a,_SLEEP
 	jnb	acc.6,00101$
-;	radio.c:221: (CLKCON & ~(CLKCON_CLKSPD | CLKCON_OSC))
+;	radio.c:227: (CLKCON & ~(CLKCON_CLKSPD | CLKCON_OSC))
 	mov	r2,_CLKCON
 	mov	a,#0xB8
 	anl	a,r2
@@ -1852,171 +1871,171 @@ _radio_init:
 	mov	a,#0x01
 	orl	a,b
 	mov	_CLKCON,a
-;	radio.c:225: while (CLKCON & CLKCON_OSC); 
+;	radio.c:231: while (CLKCON & CLKCON_OSC); 
 00104$:
 	mov	a,_CLKCON
 	jb	acc.6,00104$
-;	radio.c:227: SLEEP |= SLEEP_OSC_PD; 
+;	radio.c:233: SLEEP |= SLEEP_OSC_PD; 
 	orl	_SLEEP,#0x04
-;	radio.c:230: RFST=RFST_SIDLE; // enter idle state
+;	radio.c:236: RFST=RFST_SIDLE; // enter idle state
 	mov	_RFST,#0x04
-;	radio.c:232: FREQ0 = 0x24;
+;	radio.c:238: FREQ0 = 0x24;
 	mov	dptr,#_FREQ0
 	mov	a,#0x24
 	movx	@dptr,a
-;	radio.c:233: FREQ1 = 0x2D;
+;	radio.c:239: FREQ1 = 0x2D;
 	mov	dptr,#_FREQ1
 	mov	a,#0x2D
 	movx	@dptr,a
-;	radio.c:234: FREQ2 = 0x24;
+;	radio.c:240: FREQ2 = 0x24;
 	mov	dptr,#_FREQ2
 	mov	a,#0x24
 	movx	@dptr,a
-;	radio.c:235: PA_TABLE0 = 0xC2;
+;	radio.c:241: PA_TABLE0 = 0xC2;
 	mov	dptr,#_PA_TABLE0
 	mov	a,#0xC2
 	movx	@dptr,a
-;	radio.c:236: FSCTRL1 = 0x0C; // FSCTRL1 Frequency Synthesizer Control 
+;	radio.c:242: FSCTRL1 = 0x0C; // FSCTRL1 Frequency Synthesizer Control 
 	mov	dptr,#_FSCTRL1
 	mov	a,#0x0C
 	movx	@dptr,a
-;	radio.c:237: MDMCFG4 = 0x1D; // MDMCFG4 Modem configuration 
+;	radio.c:243: MDMCFG4 = 0x1D; // MDMCFG4 Modem configuration 
 	mov	dptr,#_MDMCFG4
 	mov	a,#0x1D
 	movx	@dptr,a
-;	radio.c:238: MDMCFG3 = 0x55; // MDMCFG3 Modem Configuration 
+;	radio.c:244: MDMCFG3 = 0x55; // MDMCFG3 Modem Configuration 
 	mov	dptr,#_MDMCFG3
 	mov	a,#0x55
 	movx	@dptr,a
-;	radio.c:239: MDMCFG2 = 0x13; // MDMCFG2 Modem Configuration 
+;	radio.c:245: MDMCFG2 = 0x13; // MDMCFG2 Modem Configuration 
 	mov	dptr,#_MDMCFG2
 	mov	a,#0x13
 	movx	@dptr,a
-;	radio.c:240: DEVIATN = 0x63; // DEVIATN Modem Deviation Setting 
+;	radio.c:246: DEVIATN = 0x63; // DEVIATN Modem Deviation Setting 
 	mov	dptr,#_DEVIATN
 	mov	a,#0x63
 	movx	@dptr,a
-;	radio.c:241: FREND1 = 0xB6; // FREND1 Front End RX Configuration 
+;	radio.c:247: FREND1 = 0xB6; // FREND1 Front End RX Configuration 
 	mov	dptr,#_FREND1
 	mov	a,#0xB6
 	movx	@dptr,a
-;	radio.c:242: FOCCFG = 0x1D; // FOCCFG Frequency Offset Compensation Configuration 
+;	radio.c:248: FOCCFG = 0x1D; // FOCCFG Frequency Offset Compensation Configuration 
 	mov	dptr,#_FOCCFG
 	mov	a,#0x1D
 	movx	@dptr,a
-;	radio.c:243: BSCFG = 0x1C; // BSCFG Bit Synchronization Configuration 
+;	radio.c:249: BSCFG = 0x1C; // BSCFG Bit Synchronization Configuration 
 	mov	dptr,#_BSCFG
 	mov	a,#0x1C
 	movx	@dptr,a
-;	radio.c:244: AGCCTRL2 = 0xC7; // AGCCTRL2 AGC Control 
+;	radio.c:250: AGCCTRL2 = 0xC7; // AGCCTRL2 AGC Control 
 	mov	dptr,#_AGCCTRL2
 	mov	a,#0xC7
 	movx	@dptr,a
-;	radio.c:245: AGCCTRL1 = 0x00; // AGCCTRL1 AGC Control 
+;	radio.c:251: AGCCTRL1 = 0x00; // AGCCTRL1 AGC Control 
 	mov	dptr,#_AGCCTRL1
 	clr	a
 	movx	@dptr,a
-;	radio.c:246: AGCCTRL0 = 0xB0; // AGCCTRL0 AGC Control 
+;	radio.c:252: AGCCTRL0 = 0xB0; // AGCCTRL0 AGC Control 
 	mov	dptr,#_AGCCTRL0
 	mov	a,#0xB0
 	movx	@dptr,a
-;	radio.c:247: FSCAL3 = 0xEA; // FSCAL3 Frequency Synthesizer Calibration 
+;	radio.c:253: FSCAL3 = 0xEA; // FSCAL3 Frequency Synthesizer Calibration 
 	mov	dptr,#_FSCAL3
 	mov	a,#0xEA
 	movx	@dptr,a
-;	radio.c:248: FSCTRL0 = 0x00; // Frequency synthesizer control.
+;	radio.c:254: FSCTRL0 = 0x00; // Frequency synthesizer control.
 	mov	dptr,#_FSCTRL0
 	clr	a
 	movx	@dptr,a
-;	radio.c:249: FREND0 = 0x10; // Front end TX configuration.
+;	radio.c:255: FREND0 = 0x10; // Front end TX configuration.
 	mov	dptr,#_FREND0
 	mov	a,#0x10
 	movx	@dptr,a
-;	radio.c:250: MCSM0 = 0x18; // Main Radio Control State Machine configuration.
+;	radio.c:256: MCSM0 = 0x18; // Main Radio Control State Machine configuration.
 	mov	dptr,#_MCSM0
 	mov	a,#0x18
 	movx	@dptr,a
-;	radio.c:251: FSCAL3 = 0xEA;
+;	radio.c:257: FSCAL3 = 0xEA;
 	mov	dptr,#_FSCAL3
 	mov	a,#0xEA
 	movx	@dptr,a
-;	radio.c:252: FSCAL2 = 0x2A;
+;	radio.c:258: FSCAL2 = 0x2A;
 	mov	dptr,#_FSCAL2
 	mov	a,#0x2A
 	movx	@dptr,a
-;	radio.c:253: FSCAL1 = 0x00; // Frequency synthesizer calibration.
+;	radio.c:259: FSCAL1 = 0x00; // Frequency synthesizer calibration.
 	mov	dptr,#_FSCAL1
 	clr	a
 	movx	@dptr,a
-;	radio.c:254: FSCAL0 = 0x1F; // Frequency synthesizer calibration.
+;	radio.c:260: FSCAL0 = 0x1F; // Frequency synthesizer calibration.
 	mov	dptr,#_FSCAL0
 	mov	a,#0x1F
 	movx	@dptr,a
-;	radio.c:255: TEST2 = 0x88; // Various test settings.
+;	radio.c:261: TEST2 = 0x88; // Various test settings.
 	mov	dptr,#_TEST2
 	mov	a,#0x88
 	movx	@dptr,a
-;	radio.c:256: TEST1 = 0x31; // Various test settings.
+;	radio.c:262: TEST1 = 0x31; // Various test settings.
 	mov	dptr,#_TEST1
 	mov	a,#0x31
 	movx	@dptr,a
-;	radio.c:257: TEST0 = 0x09; // Various test settings.
+;	radio.c:263: TEST0 = 0x09; // Various test settings.
 	mov	dptr,#_TEST0
 	mov	a,#0x09
 	movx	@dptr,a
-;	radio.c:260: MDMCFG1 = 0x23; // calc for 24 MHz
+;	radio.c:266: MDMCFG1 = 0x23; // calc for 24 MHz
 	mov	dptr,#_MDMCFG1
 	mov	a,#0x23
 	movx	@dptr,a
-;	radio.c:261: MDMCFG0 = 0x11; // calc for 24 MHz
+;	radio.c:267: MDMCFG0 = 0x11; // calc for 24 MHz
 	mov	dptr,#_MDMCFG0
 	mov	a,#0x11
 	movx	@dptr,a
-;	radio.c:262: CHANNR = 0x00;
+;	radio.c:268: CHANNR = 0x00;
 	mov	dptr,#_CHANNR
 	clr	a
 	movx	@dptr,a
-;	radio.c:263: MCSM1 = 0x30; // Main Radio Control State Machine configuration.
+;	radio.c:269: MCSM1 = 0x30; // Main Radio Control State Machine configuration.
 	mov	dptr,#_MCSM1
 	mov	a,#0x30
 	movx	@dptr,a
-;	radio.c:264: PKTCTRL1 = 0x04; // Packet automation control.
+;	radio.c:270: PKTCTRL1 = 0x04; // Packet automation control.
 	mov	dptr,#_PKTCTRL1
 	mov	a,#0x04
 	movx	@dptr,a
-;	radio.c:265: PKTCTRL0 = 0x45; // Packet automation control. Data whitening on.
+;	radio.c:271: PKTCTRL0 = 0x45; // Packet automation control. Data whitening on.
 	mov	dptr,#_PKTCTRL0
 	mov	a,#0x45
 	movx	@dptr,a
-;	radio.c:266: ADDR = 0x00; // Device address. Not used.
+;	radio.c:272: ADDR = 0x00; // Device address. Not used.
 	mov	dptr,#_ADDR
 	clr	a
 	movx	@dptr,a
-;	radio.c:267: PKTLEN = 0x0F;
+;	radio.c:273: PKTLEN = 0x0F;
 	mov	dptr,#_PKTLEN
 	mov	a,#0x0F
 	movx	@dptr,a
-;	radio.c:268: rssi_offset = 77;
+;	radio.c:274: rssi_offset = 77;
 	mov	_rssi_offset,#0x4D
 	clr	a
 	mov	(_rssi_offset + 1),a
-;	radio.c:269: RFIF = 0;
+;	radio.c:275: RFIF = 0;
 	mov	_RFIF,#0x00
-;	radio.c:270: packet_index = 0;
+;	radio.c:276: packet_index = 0;
 	mov	_packet_index,#0x00
-;	radio.c:272: RFTXRXIF=0;
+;	radio.c:278: RFTXRXIF=0;
 	clr	_RFTXRXIF
-;	radio.c:273: RFTXRXIE=1;
+;	radio.c:279: RFTXRXIE=1;
 	setb	_RFTXRXIE
-;	radio.c:276: RFST=RFST_SIDLE;
+;	radio.c:282: RFST=RFST_SIDLE;
 	mov	_RFST,#0x04
-;	radio.c:277: while(MARCSTATE!=MARC_STATE_IDLE);
+;	radio.c:283: while(MARCSTATE!=MARC_STATE_IDLE);
 00107$:
 	mov	dptr,#_MARCSTATE
 	movx	a,@dptr
 	mov	r2,a
 	cjne	r2,#0x01,00107$
-;	radio.c:278: cons_putsln("Radio Started");
+;	radio.c:284: cons_putsln("Radio Started");
 	mov	dptr,#__str_18
 	mov	b,#0x80
 	ljmp	_cons_putsln
@@ -2025,12 +2044,12 @@ _radio_init:
 ;------------------------------------------------------------
 ;swstate                   Allocated with name '_main_swstate_1_1'
 ;------------------------------------------------------------
-;	radio.c:281: void main() {
+;	radio.c:287: void main() {
 ;	-----------------------------------------
 ;	 function main
 ;	-----------------------------------------
 _main:
-;	radio.c:286: PERCFG = (PERCFG & ~PERCFG_U0CFG) | PERCFG_U1CFG;
+;	radio.c:292: PERCFG = (PERCFG & ~PERCFG_U0CFG) | PERCFG_U1CFG;
 	mov	r2,_PERCFG
 	mov	a,#0xFE
 	anl	a,r2
@@ -2038,44 +2057,44 @@ _main:
 	mov	a,#0x02
 	orl	a,b
 	mov	_PERCFG,a
-;	radio.c:287: P0SEL |= 0x08 | 0x04;
+;	radio.c:293: P0SEL |= 0x08 | 0x04;
 	orl	_P0SEL,#0x0C
-;	radio.c:288: U0CSR |= 0x80 | 0x40;
+;	radio.c:294: U0CSR |= 0x80 | 0x40;
 	orl	_U0CSR,#0xC0
-;	radio.c:290: U0GCR = 13;
+;	radio.c:296: U0GCR = 13;
 	mov	_U0GCR,#0x0D
-;	radio.c:291: U0BAUD = 59;
+;	radio.c:297: U0BAUD = 59;
 	mov	_U0BAUD,#0x3B
-;	radio.c:292: URX0IF = 0;
+;	radio.c:298: URX0IF = 0;
 	clr	_URX0IF
-;	radio.c:295: P1DIR |= 0x08;
+;	radio.c:301: P1DIR |= 0x08;
 	orl	_P1DIR,#0x08
-;	radio.c:296: P1_3 = 0;
+;	radio.c:302: P1_3 = 0;
 	clr	_P1_3
-;	radio.c:299: swstate = P1_6;
+;	radio.c:305: swstate = P1_6;
 	mov	c,_P1_6
 	clr	a
 	rlc	a
 	mov	_main_swstate_1_1,a
 	mov	(_main_swstate_1_1 + 1),#0x00
-;	radio.c:301: radio_init();
+;	radio.c:307: radio_init();
 	lcall	_radio_init
-;	radio.c:304: F1 = 1;
+;	radio.c:310: F1 = 1;
 	setb	_F1
-;	radio.c:305: EA = 1;
+;	radio.c:311: EA = 1;
 	setb	_EA
-;	radio.c:308: sendllap("aLLSTARTING-", 5);
+;	radio.c:314: sendllap("STARTING-", 5);
 	mov	_sendllap_PARM_2,#0x05
 	clr	a
 	mov	(_sendllap_PARM_2 + 1),a
 	mov	dptr,#__str_19
 	mov	b,#0x80
 	lcall	_sendllap
-;	radio.c:310: while(1) {
+;	radio.c:316: while(1) {
 00102$:
-;	radio.c:312: getpacket();
+;	radio.c:318: getpacket();
 	lcall	_getpacket
-;	radio.c:314: switchchange(&swstate);
+;	radio.c:320: switchchange(&swstate);
 	mov	dptr,#_main_swstate_1_1
 	mov	b,#0x40
 	lcall	_switchchange
@@ -2093,45 +2112,45 @@ __str_2:
 	.ascii "Done TX"
 	.db 0x00
 __str_3:
-	.ascii "New Packet:"
+	.ascii "%s%s%s%s"
 	.db 0x00
 __str_4:
+	.ascii "a"
 	.db 0x00
 __str_5:
-	.ascii "RSSI: "
+	.ascii "New Packet:"
 	.db 0x00
 __str_6:
-	.ascii " LQI: "
 	.db 0x00
 __str_7:
-	.ascii "CRC: OK"
+	.ascii "RSSI: "
 	.db 0x00
 __str_8:
-	.ascii "CRC: Fail"
+	.ascii " LQI: "
 	.db 0x00
 __str_9:
-	.ascii "aLL"
+	.ascii "CRC: OK"
 	.db 0x00
 __str_10:
-	.ascii "LEDON----"
+	.ascii "CRC: Fail"
 	.db 0x00
 __str_11:
-	.ascii "LEDOFF---"
+	.ascii "aLL"
 	.db 0x00
 __str_12:
-	.ascii "HELLO----"
+	.ascii "LEDON----"
 	.db 0x00
 __str_13:
-	.ascii "REBOOT---"
+	.ascii "LEDOFF---"
 	.db 0x00
 __str_14:
-	.ascii "LED------"
+	.ascii "HELLO----"
 	.db 0x00
 __str_15:
-	.ascii "aLLLEDOFF---"
+	.ascii "REBOOT---"
 	.db 0x00
 __str_16:
-	.ascii "aLLLEDON----"
+	.ascii "LED------"
 	.db 0x00
 __str_17:
 	.ascii "Waiting to receive..."
@@ -2140,7 +2159,7 @@ __str_18:
 	.ascii "Radio Started"
 	.db 0x00
 __str_19:
-	.ascii "aLLSTARTING-"
+	.ascii "STARTING-"
 	.db 0x00
 	.area XINIT   (CODE)
 	.area CABS    (ABS,CODE)

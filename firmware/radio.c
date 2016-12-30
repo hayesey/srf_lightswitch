@@ -11,6 +11,7 @@ static __xdata uint8_t packet[MAXLEN];
 
 uint8_t preamble[] = {0x0E, 0x5A, 0xA5};
 unsigned int rssi_offset;
+char llapid[] = "LA";
 
 void delay(int msec) {
   int i,j;
@@ -114,9 +115,14 @@ void sendllap(char *m, int count) {
   int i=0;
   // sends an llap message count times
   // put packet header in
-  memcpy(packet, preamble, sizeof(preamble)/sizeof(uint8_t));
+  //  char header[7];
+  //  strcat(header, preamble);
+  //  strcat(header, "a");
+  //  strcat(header, llapid);
+  //  memcpy(packet, header, sizeof(header)/sizeof(uint8_t));
   // put packet data in
-  memcpy(packet+sizeof(preamble)/sizeof(uint8_t), m, 12);
+  //  memcpy(packet+sizeof(header)/sizeof(uint8_t), m, 12);
+  sprintf(packet, "%s%s%s%s", preamble, "a", llapid, m);
   // send it!
   for (i=0; i<count; i++)
     sendpacket();
@@ -185,9 +191,9 @@ void getpacket() {
       } else if (strncmp(llapmsg+3, "LED------", 9) == 0) {
 	// send led current state
 	if (P1_3 == 0) {
-	  sendllap("aLLLEDOFF---", 1);
+	  sendllap("LEDOFF---", 1);
 	} else {
-	  sendllap("aLLLEDON----", 1);
+	  sendllap("LEDON----", 1);
 	}
       }
     }
@@ -305,7 +311,7 @@ void main() {
   EA = 1;
 
   // send bootup message 5 times
-  sendllap("aLLSTARTING-", 5);
+  sendllap("STARTING-", 5);
 
   while(1) {
     // rx forever

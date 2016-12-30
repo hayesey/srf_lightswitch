@@ -608,24 +608,24 @@ Symbol Table
   5 __start__stack                                                 0000 GR
  17 __str_0                                                        0000 R
  17 __str_1                                                        0003 R
- 17 __str_10                                                       0045 R
- 17 __str_11                                                       004F R
- 17 __str_12                                                       0059 R
- 17 __str_13                                                       0063 R
- 17 __str_14                                                       006D R
- 17 __str_15                                                       0077 R
- 17 __str_16                                                       0084 R
- 17 __str_17                                                       0091 R
- 17 __str_18                                                       00A7 R
- 17 __str_19                                                       00B5 R
+ 17 __str_10                                                       0042 R
+ 17 __str_11                                                       004C R
+ 17 __str_12                                                       0050 R
+ 17 __str_13                                                       005A R
+ 17 __str_14                                                       0064 R
+ 17 __str_15                                                       006E R
+ 17 __str_16                                                       0078 R
+ 17 __str_17                                                       0082 R
+ 17 __str_18                                                       0098 R
+ 17 __str_19                                                       00A6 R
  17 __str_2                                                        000C R
  17 __str_3                                                        0014 R
- 17 __str_4                                                        0020 R
- 17 __str_5                                                        0021 R
- 17 __str_6                                                        0028 R
- 17 __str_7                                                        002F R
- 17 __str_8                                                        0037 R
- 17 __str_9                                                        0041 R
+ 17 __str_4                                                        001D R
+ 17 __str_5                                                        001F R
+ 17 __str_6                                                        002B R
+ 17 __str_7                                                        002C R
+ 17 __str_8                                                        0033 R
+ 17 __str_9                                                        003A R
  16 _cons_putc                                                     003F GR
  16 _cons_puthex16                                                 00A1 GR
  16 _cons_puthex8                                                  0082 GR
@@ -633,23 +633,22 @@ Symbol Table
  16 _cons_putsln                                                   0076 GR
  16 _convert_rssi                                                  00F6 GR
  16 _delay                                                         0000 GR
- 16 _getpacket                                                     0275 GR
-  3 _getpacket_llapmsg_1_1                                         0008 R
- 16 _main                                                          05BC GR
-  3 _main_swstate_1_1                                              0015 R
-    _memcpy                                                        **** GX
-    _memcpy_PARM_2                                                 **** GX
-    _memcpy_PARM_3                                                 **** GX
+ 16 _getpacket                                                     0286 GR
+  3 _getpacket_llapmsg_1_1                                         000B R
+  3 _llapid                                                        0006 GR
+ 16 _main                                                          05CD GR
+  3 _main_swstate_1_1                                              0018 R
  16 _nibble_to_char                                                002C GR
   A _packet                                                        0000 R
   3 _packet_index                                                  0000 R
   3 _preamble                                                      0001 GR
- 16 _radio_init                                                    04B1 GR
+ 16 _radio_init                                                    04C2 GR
  16 _rftxrx_isr                                                    018D GR
   3 _rssi_offset                                                   0004 GR
  16 _sendllap                                                      020E GR
-  3 _sendllap_PARM_2                                               0006 GR
+  3 _sendllap_PARM_2                                               0009 GR
  16 _sendpacket                                                    01D8 GR
+    _sprintf                                                       **** GX
     _strncmp                                                       **** GX
     _strncmp_PARM_2                                                **** GX
     _strncmp_PARM_3                                                **** GX
@@ -838,7 +837,7 @@ Area Table
    0 _CODE                                                                              size    0   flags 0
    1 RSEG                                                                               size    0   flags 0
    2 REG_BANK_0                                                                         size    8   flags 4
-   3 DSEG                                                                               size   17   flags 0
+   3 DSEG                                                                               size   1A   flags 0
    4 OSEG                                                                               size    0   flags 4
    5 SSEG                                                                               size    1   flags 0
    6 ISEG                                                                               size    0   flags 0
@@ -855,9 +854,9 @@ Area Table
   11 GSINIT3                                                                            size    0   flags 20
   12 GSINIT4                                                                            size    0   flags 20
   13 GSINIT5                                                                            size    0   flags 20
-  14 GSINIT                                                                             size    9   flags 20
+  14 GSINIT                                                                             size   12   flags 20
   15 GSFINAL                                                                            size    3   flags 20
-  16 CSEG                                                                               size  609   flags 20
-  17 CONST                                                                              size   C2   flags 20
+  16 CSEG                                                                               size  61A   flags 20
+  17 CONST                                                                              size   B0   flags 20
   18 XINIT                                                                              size    0   flags 20
   19 CABS                                                                               size    0   flags 28
