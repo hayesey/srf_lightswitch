@@ -1,7 +1,5 @@
-#
-# CC Debugger - Example Payload
-# Fergus Noble (c) 2011
-#
+
+UPLOADER = /usr/local/bin/cc-tool
 
 CC = sdcc
 
@@ -12,7 +10,7 @@ CFLAGS = --model-small --opt-code-speed
 LDFLAGS_FLASH = \
 	--out-fmt-ihx \
 	--code-loc 0x000 --code-size 0x8000 \
-	--xram-loc 0xf000 --xram-size 0x300 \
+	--xram-loc 0xf000 --xram-size 0x1000 \
 	--iram-size 0x100
 
 ifdef DEBUG
@@ -48,3 +46,5 @@ clean:
 	rm -f $(ADB) $(ASM) $(LNK) $(LST) $(REL) $(RST) $(SYM)
 	rm -f $(PROGS) $(PCDB) $(PLNK) $(PMAP) $(PMEM) $(PAOM)
 
+upload:
+	sudo $(UPLOADER) -v -e -w $(PROGS)
