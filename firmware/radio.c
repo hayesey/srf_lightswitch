@@ -11,7 +11,7 @@ static __xdata uint8_t packet[MAXLEN];
 
 uint8_t preamble[] = {0x0E, 0x5A, 0xA5};
 unsigned int rssi_offset;
-char llapid[] = "LA";
+char llapid[] = "LB";
 
 void delay(int msec) {
   int i,j;
@@ -114,15 +114,15 @@ void sendpacket() {
 void sendllap(char *m, int count) {
   int i=0;
   // sends an llap message count times
-  // put packet header in
-  //  char header[7];
-  //  strcat(header, preamble);
-  //  strcat(header, "a");
-  //  strcat(header, llapid);
-  //  memcpy(packet, header, sizeof(header)/sizeof(uint8_t));
+  // put preable in
+  memcpy(packet, preamble, 3);
+  // put llap header in
+  memcpy(packet+3, "a", 1);
+  // put llapid id
+  memcpy(packet+4, llapid, 2);
   // put packet data in
-  //  memcpy(packet+sizeof(header)/sizeof(uint8_t), m, 12);
-  sprintf(packet, "%s%s%s%s", preamble, "a", llapid, m);
+  memcpy(packet+6, m, 12);
+  
   // send it!
   for (i=0; i<count; i++)
     sendpacket();
@@ -173,27 +173,31 @@ void getpacket() {
     }
     
     // process llap message if it is one and its for us
-    if (strncmp(llapmsg, "aLL", 3) == 0) {
+    if (strncmp(llapmsg, "a", 1) == 0) {
       // seems like a valid llap message
-      if (strncmp(llapmsg+3, "LEDON----", 9) == 0) {
-	sendllap(llapmsg, 1);
-	P1_3 = 1; // turn on
-      } else if (strncmp(llapmsg+3, "LEDOFF---", 9) == 0) {
-	sendllap(llapmsg, 1);
-	P1_3 = 0; // turn off
-      } else if (strncmp(llapmsg+3, "HELLO----", 9) == 0) {
-	// ping
-	sendllap(llapmsg, 1);
-      } else if (strncmp(llapmsg+3, "REBOOT---", 9) == 0) {
-	// soft reboot to start of code
-	sendllap(llapmsg, 1);
-	__asm LCALL 0x0 __endasm;
-      } else if (strncmp(llapmsg+3, "LED------", 9) == 0) {
-	// send led current state
-	if (P1_3 == 0) {
-	  sendllap("LEDOFF---", 1);
-	} else {
+      char msgid[] = {llapmsg[1], llapmsg[2], '\0'};
+      if (strcmp(msgid, llapid) == 0) {
+	// it's for us
+	if (strncmp(llapmsg+3, "LEDON----", 9) == 0) {
 	  sendllap("LEDON----", 1);
+	  P1_3 = 1; // turn on
+	} else if (strncmp(llapmsg+3, "LEDOFF---", 9) == 0) {
+	  sendllap("LEDOFF---", 1);
+	  P1_3 = 0; // turn off
+	} else if (strncmp(llapmsg+3, "HELLO----", 9) == 0) {
+	  // ping
+	  sendllap("HELLO----", 1);
+	} else if (strncmp(llapmsg+3, "REBOOT---", 9) == 0) {
+	  // soft reboot to start of code
+	  sendllap("REBOOT---", 1);
+	  __asm LCALL 0x0 __endasm;
+	} else if (strncmp(llapmsg+3, "LED------", 9) == 0) {
+	  // send led current state
+	  if (P1_3 == 0) {
+	    sendllap("LEDOFF---", 1);
+	  } else {
+	    sendllap("LEDON----", 1);
+	  }
 	}
       }
     }
