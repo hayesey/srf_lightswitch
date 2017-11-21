@@ -243,6 +243,9 @@ void radio_init(void) {
   FREQ1 = 0x2D;
   FREQ2 = 0x24;
   PA_TABLE0 = 0xC2;
+
+  // 250KBAUD
+  /*
   FSCTRL1 = 0x0C; // FSCTRL1 Frequency Synthesizer Control 
   MDMCFG4 = 0x1D; // MDMCFG4 Modem configuration 
   MDMCFG3 = 0x55; // MDMCFG3 Modem Configuration 
@@ -255,10 +258,25 @@ void radio_init(void) {
   AGCCTRL1 = 0x00; // AGCCTRL1 AGC Control 
   AGCCTRL0 = 0xB0; // AGCCTRL0 AGC Control 
   FSCAL3 = 0xEA; // FSCAL3 Frequency Synthesizer Calibration 
+  */
+
+  // 1.2KBAUD
+  FSCTRL1 = 0x06; // FSCTRL1 Frequency Synthesizer Control
+  MDMCFG4 = 0xE5; // MDMCFG4 Modem configuration
+  MDMCFG3 = 0xA3; // MDMCFG3 Modem Configuration
+  MDMCFG2 = 0x13; // MDMCFG2 Modem Configuration
+  DEVIATN = 0x16; // DEVIATN Modem Deviation Setting
+  FREND1 = 0xB6; // FREND1 Front End RX Configuration
+  FOCCFG = 0x1D; // FOCCFG Frequency Offset Compensation Configuration
+  BSCFG = 0x6C; // BSCFG Bit Synchronization Configuration
+  AGCCTRL2 = 0x43; // AGCCTRL2 AGC Control
+  AGCCTRL1 = 0x40; // AGCCTRL1 AGC Control
+  AGCCTRL0 = 0x91; // AGCCTRL0 AGC Control
+  FSCAL3 = 0xE9; // FSCAL3 Frequency Synthesizer Calibration
+
   FSCTRL0 = 0x00; // Frequency synthesizer control.
   FREND0 = 0x10; // Front end TX configuration.
   MCSM0 = 0x18; // Main Radio Control State Machine configuration.
-  FSCAL3 = 0xEA;
   FSCAL2 = 0x2A;
   FSCAL1 = 0x00; // Frequency synthesizer calibration.
   FSCAL0 = 0x1F; // Frequency synthesizer calibration.
